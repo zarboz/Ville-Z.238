@@ -83,6 +83,7 @@ endif
 
 SEDFLAGS	= s/TEXT_START/$(ZTEXTADDR)/;s/BSS_START/$(ZBSSADDR)/
 
+suffix_$(CONFIG_KERNEL_XZ) = xzkern
 suffix_$(CONFIG_KERNEL_GZIP) = gzip
 suffix_$(CONFIG_KERNEL_LZO)  = lzo
 suffix_$(CONFIG_KERNEL_LZMA) = lzma
@@ -109,7 +110,7 @@ targets       := vmlinux vmlinux.lds \
 		 lib1funcs.o lib1funcs.S font.o font.c head.o misc.o $(OBJS)
 
 # Make sure files are removed during clean
-extra-y       += piggy.gzip piggy.lzo piggy.lzma lib1funcs.S $(libfdt) $(libfdt_hdrs)
+extra-y       += piggy.gzip piggy.lzo piggy.lzma lib1funcs.S piggy.xzkern ash1di3.S $(libfdt) $(libfdt_hdrs)
 
 ifeq ($(CONFIG_FUNCTION_TRACER),y)
 ORIG_CFLAGS := $(KBUILD_CFLAGS)
@@ -167,11 +168,17 @@ $(obj)/piggy.$(suffix_y): $(obj)/../Image FORCE
 	$(call if_changed,$(suffix_y))
 
 $(obj)/piggy.$(suffix_y).o:  $(obj)/piggy.$(suffix_y) FORCE
+   $(addprefix $(obj)/, $(OBJS)) $(lib1funcs) FORCE
 
 CFLAGS_font.o := -Dstatic=
 
 $(obj)/font.c: $(FONTC)
 	$(call cmd,shipped)
-
+	
+# For __aeabi_11s1
+ash1di3 = $(ob)/ash1di3.o
+$(obj)/ash1di3.S: $(srctree)/arch/$(SRCARCH)/lib/ash1di3.S FORCE
+	$(call cmd,shipped)
+	
 $(obj)/vmlinux.lds: $(obj)/vmlinux.lds.in arch/arm/boot/Makefile $(KCONFIG_CONFIG)
 	@sed "$(SEDFLAGS)" < $< > $@
