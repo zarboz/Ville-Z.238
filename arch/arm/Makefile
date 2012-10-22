@@ -17,8 +17,8 @@ endif
 
 OBJCOPYFLAGS	:=-O binary -R .comment -S
 GZFLAGS		:=-9
-#KBUILD_CFLAGS	+=-pipe
-# Explicitly specifiy 32-bit ARM ISA since toolchain default can be -mthumb:
+KBUILD_CFLAGS	+=-pipe
+# Explicitly specifiy 32-bit ARM ISA since toolchain defaAult can be -mthumb:
 KBUILD_CFLAGS	+=$(call cc-option,-marm,)
 
 # Never generate .eh_frame
